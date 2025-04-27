@@ -155,5 +155,6 @@ This merged README combines both versions while:
 
 The structure flows from overview to specific details, making it easy for both technical and non-technical users to understand the application's capabilities.
 
-License
-This project is licensed under the MIT License - see the LICENSE file for details.
+##License
+
+- This project is licensed under the MIT License - see the LICENSE file for details.
