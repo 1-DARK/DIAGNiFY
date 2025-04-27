@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video Chatbot</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: #0a0a0a;
+        color: #e0e0e0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+      }
+
+      .header {
+        background-color: #0d0d1a;
+        padding: 15px 20px;
+        border-radius: 10px 10px 0 0;
+        border-bottom: 2px solid #1e3a8a;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .header h1 {
+        color: #3b82f6;
+        font-size: 1.5rem;
+      }
+
+      .recording-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .recording-indicator.active {
+        opacity: 1;
+      }
+
+      .recording-dot {
+        width: 12px;
+        height: 12px;
+        background-color: #ef4444;
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      .recording-text {
+        color: #ef4444;
+        font-weight: 500;
+      }
+
+      .main-container {
+        display: flex;
+        /* Adjust height calculation considering header and controls below */
+        height: calc(
+          100vh - 140px
+        ); /* This might need fine-tuning based on control bar height */
+      }
+
+      .chat-area {
+        flex: 1;
+        background-color: #121212;
+        border-radius: 0 0 0 10px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .video-area {
+        flex: 1;
+        background-color: #0f0f1f;
+        border-left: 2px solid #1e3a8a;
+        border-radius: 0 0 10px 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .messages {
+        flex-grow: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .message {
+        max-width: 80%;
+        padding: 10px 15px;
+        border-radius: 18px;
+        animation: fadeIn 0.3s ease-in-out;
+        word-wrap: break-word; /* Ensure long text wraps */
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .user-message {
+        align-self: flex-end;
+        background-color: #1e3a8a;
+        color: white;
+        border-bottom-right-radius: 5px;
+      }
+
+      .bot-message {
+        align-self: flex-start;
+        background-color: #1f2937;
+        color: #e0e0e0;
+        border-bottom-left-radius: 5px;
+      }
+
+      .video-message {
+        max-width: 80%;
+        align-self: flex-end; /* User is sending the video */
+        background-color: #1e3a8a;
+        border-radius: 18px;
+        border-bottom-right-radius: 5px;
+        overflow: hidden;
+        animation: fadeIn 0.3s ease-in-out;
+      }
+
+      .video-message video {
+        width: 100%;
+        max-width: 300px; /* Limit preview size */
+        display: block;
+      }
+
+      .video-container {
+        flex-grow: 1;
+        position: relative;
+        background-color: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #videoElement {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain; /* Prevent stretching */
+      }
+
+      .video-controls {
+        display: flex;
+        padding: 15px;
+        background-color: #0d0d1a;
+        border-top: 1px solid #1e3a8a;
+        justify-content: center;
+        gap: 15px;
+      }
+
+      .video-button {
+        padding: 10px 20px;
+        background-color: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .video-button:hover:not(:disabled) {
+        background-color: #2563eb;
+        transform: translateY(-2px);
+      }
+
+      .video-button:active:not(:disabled) {
+        transform: translateY(0);
+      }
+
+      .video-button:disabled {
+        background-color: #6b7280;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .video-button.stop {
+        background-color: #ef4444;
+      }
+
+      .video-button.stop:hover:not(:disabled) {
+        background-color: #dc2626;
+      }
+
+      .button-icon {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+      }
+
+      .status-message {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none; /* Don't block clicks */
+        z-index: 10; /* Ensure it's above video */
+      }
+
+      .status-message.visible {
+        opacity: 1;
+      }
+
+      @media (max-width: 768px) {
+        .main-container {
+          flex-direction: column;
+          height: calc(100vh - 140px);
+        }
+
+        .chat-area,
+        .video-area {
+          flex: none;
+          border-radius: 0;
+        }
+
+        .chat-area {
+          height: 50%; /* Adjust as needed */
+        }
+
+        .video-area {
+          height: 50%; /* Adjust as needed */
+          border-left: none;
+          border-top: 2px solid #1e3a8a;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Video Chatbot</h1>
+        <div class="recording-indicator" id="recordingIndicator">
+          <div class="recording-dot"></div>
+          <span class="recording-text">Recording</span>
+        </div>
+      </div>
+      <div class="main-container">
+        <div class="chat-area">
+          <div class="messages" id="messages">
+            <div class="message bot-message">
+              Hello! I'm your video assistant. Click "Start Video" to record a
+              video message.
+            </div>
+          </div>
+        </div>
+        <div class="video-area">
+          <div class="video-container">
+            <!-- Removed muted as audio needs to be sent -->
+            <video id="videoElement" autoplay playsinline></video>
+            <div class="status-message" id="statusMessage"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="video-controls">
+        <button class="video-button" id="startButton">
+          <svg
+            class="button-icon"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"
+            ></path>
+          </svg>
+          Start Video
+        </button>
+        <button class="video-button stop" id="stopButton" disabled>
+          <svg
+            class="button-icon"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"
+            ></path>
+          </svg>
+          Stop Video
+        </button>
+      </div>
+    </div>
+
+    <script>
+      // DOM Elements
+      const messagesContainer = document.getElementById("messages");
+      const videoElement = document.getElementById("videoElement");
+      const startButton = document.getElementById("startButton");
+      const stopButton = document.getElementById("stopButton");
+      const recordingIndicator = document.getElementById("recordingIndicator");
+      const statusMessage = document.getElementById("statusMessage");
+
+      // Backend endpoint URL - This is the URL from your curl command
+      const BACKEND_URL = "http://127.0.0.1:8000/video";
+
+      // Variables for video recording
+      let stream = null;
+      let mediaRecorder = null;
+      let recordedChunks = [];
+
+      // --- Utility Functions ---
+
+      // Function to add a text message to the chat
+      function addTextMessage(text, isUser) {
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("message");
+        messageDiv.classList.add(isUser ? "user-message" : "bot-message");
+        // Use innerHTML if backend might return formatted text, or textContent for plain text
+        messageDiv.textContent = text;
+        messagesContainer.appendChild(messageDiv);
+        // Scroll to the bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      // Function to add a video message to the chat (user's message)
+      function addVideoMessage(videoBlob) {
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("video-message");
+
+        const videoEl = document.createElement("video");
+        videoEl.controls = true; // Allow playback controls
+        videoEl.src = URL.createObjectURL(videoBlob); // Create a local URL for playback
+
+        messageDiv.appendChild(videoEl);
+        messagesContainer.appendChild(messageDiv);
+        // Scroll to the bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      // Function to display a temporary status message
+      function showStatusMessage(text) {
+        statusMessage.textContent = text;
+        statusMessage.classList.add("visible");
+        // Automatically hide after 3 seconds
+        setTimeout(() => {
+          statusMessage.classList.remove("visible");
+        }, 3000);
+      }
+
+      // --- Core Functionality ---
+
+      // Function to start video recording
+      async function startVideoRecording() {
+        try {
+          // Request access to the user's camera and microphone
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true,
+          });
+
+          // Display the live video stream
+          videoElement.srcObject = stream;
+
+          // Create a MediaRecorder instance
+          const options = { mimeType: "video/webm; codecs=vp9,opus" };
+          if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+            console.warn(
+              `${options.mimeType} is not supported. Trying 'video/webm'.`
+            );
+            options.mimeType = "video/webm";
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+              console.warn(
+                `${options.mimeType} is not supported either. Trying first supported type.`
+              );
+              // Find a supported type if webm isn't available (less common)
+              const supportedTypes = [
+                "video/webm; codecs=vp8,opus",
+                "video/webm",
+                'video/mp4; codecs="avc1.424028, mp4a.402"', // Common H.264 MP4 codec
+                "video/mp4",
+              ];
+              for (const type of supportedTypes) {
+                if (MediaRecorder.isTypeSupported(type)) {
+                  options.mimeType = type;
+                  console.log(`Using supported type: ${options.mimeType}`);
+                  break;
+                }
+              }
+              if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                console.error("No supported video mime type found!");
+                addTextMessage(
+                  "Error: Your browser doesn't support recording video.",
+                  false
+                );
+                stopVideoRecording(); // Attempt to clean up stream access
+                return;
+              }
+            }
+          }
+
+          mediaRecorder = new MediaRecorder(stream, options);
+
+          // Event handler for when data becomes available (chunks of video)
+          mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              recordedChunks.push(event.data);
+            }
+          };
+
+          // Event handler for when recording stops
+          mediaRecorder.onstop = () => {
+            // Create a single blob from all recorded chunks
+            const videoBlob = new Blob(recordedChunks, {
+              type: mediaRecorder.mimeType,
+            });
+
+            // Add the recorded video to the chat immediately (user's message)
+            addVideoMessage(videoBlob);
+
+            // Send the video blob to the backend - THIS IS THE RELEVANT PART
+            sendVideoToBackend(videoBlob);
+
+            // Reset recorded chunks for the next recording
+            recordedChunks = [];
+          };
+
+          // Start recording the stream
+          mediaRecorder.start();
+
+          // Update UI state
+          startButton.disabled = true;
+          stopButton.disabled = false;
+          recordingIndicator.classList.add("active");
+          showStatusMessage("Recording...");
+        } catch (err) {
+          console.error("Error accessing camera or microphone:", err);
+          let errorMessage =
+            "Error accessing your camera and microphone. Please check permissions.";
+          if (err.name === "NotAllowedError") {
+            errorMessage =
+              "Permission denied to access camera/microphone. Please grant permission.";
+          } else if (err.name === "NotFoundError") {
+            errorMessage = "No camera or microphone found.";
+          } else if (err.message.includes("constrain")) {
+            // Check for constraint errors
+            errorMessage =
+              "Error applying video constraints. Your device might not support the requested resolution/framerate.";
+          }
+          addTextMessage(errorMessage, false);
+          showStatusMessage("Error starting video.");
+          // Ensure buttons are enabled if stream wasn't started
+          startButton.disabled = false;
+          stopButton.disabled = true;
+        }
+      }
+
+      // Function to stop video recording
+      function stopVideoRecording() {
+        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+          // Stop the media recorder
+          mediaRecorder.stop();
+
+          // Stop all tracks on the stream to release the camera/mic
+          if (stream) {
+            stream.getTracks().forEach((track) => track.stop());
+          }
+
+          // Clear the video element source
+          videoElement.srcObject = null;
+
+          // Update UI state
+          startButton.disabled = false;
+          stopButton.disabled = true;
+          recordingIndicator.classList.remove("active");
+          showStatusMessage("Stopping recording..."); // Status will update again after sending
+        }
+      }
+
+      // Function to send the video blob to the backend - THIS FUNCTION IMPLEMENTS THE CURL LOGIC
+      async function sendVideoToBackend(videoBlob) {
+        showStatusMessage("Sending video to chatbot...");
+
+        // Create a FormData object to mimic the curl -F behavior
+        const formData = new FormData();
+        // Append fields as expected by the backend based on the curl command
+        // -F "title=Vid" -> formData.append("title", "Vid")
+        formData.append("title", "Vid");
+        // -F "video=@/path/to/file.mp4" -> formData.append("video", videoBlob, "filename")
+        // We use the videoBlob we created and give it a generic filename
+        const filename = `webcam_video.${
+          videoBlob.type.split("/")[1].split(";")[0]
+        }`; // Get file extension from mime type
+        formData.append("video", videoBlob, filename);
+
+        try {
+          // Perform the POST request using fetch API
+          const response = await fetch(BACKEND_URL, {
+            method: "POST",
+            body: formData, // FormData automatically sets Content-Type to multipart/form-data
+            // No need to set headers manually for FormData
+          });
+
+          if (!response.ok) {
+            // Handle HTTP errors (e.g., 404, 500, 400)
+            const errorText = await response.text(); // Get response body for more info
+            console.error(
+              "Backend response error:",
+              response.status,
+              errorText
+            );
+            throw new Error(
+              `HTTP error! status: ${response.status}, message: ${
+                response.statusText || errorText
+              }`
+            );
+          }
+
+          // Assuming the backend returns JSON with the chatbot's response
+          // Adjust 'data.response' or 'data.text' based on your *actual* backend JSON structure
+          const data = await response.json();
+
+          const botReply =
+            data.response ||
+            data.text ||
+            (typeof data === "string"
+              ? data
+              : "Received video, but no specific text response key ('response' or 'text') found in backend data.");
+
+          // Add the bot's response to the chat
+          addTextMessage(botReply, false);
+
+          showStatusMessage("Video sent, response received.");
+        } catch (error) {
+          console.error("Error sending video or getting response:", error);
+          let displayError = error.message;
+          if (error.message.includes("Failed to fetch")) {
+            displayError =
+              "Could not connect to the backend server. Is it running?";
+          } else if (error.message.includes("HTTP error")) {
+            // Use the more detailed error message from the throw
+            displayError = error.message;
+          }
+          addTextMessage(
+            `Error communicating with the chatbot backend: ${displayError}`,
+            false
+          );
+          showStatusMessage("Error sending video.");
+        }
+      }
+
+      // Event listeners
+      startButton.addEventListener("click", startVideoRecording);
+      stopButton.addEventListener("click", stopVideoRecording);
+
+      // Initial state setup
+      document.addEventListener("DOMContentLoaded", () => {
+        startButton.disabled = false;
+        stopButton.disabled = true;
+        // Initial bot message is already in the HTML
+      });
+    </script>
+  </body>
+</html>
