@@ -53,6 +53,11 @@ Diagnify is an advanced health technology platform that combines AI-powered medi
   - jsPDF (PDF report generation)
   - GSAP plugins (ScrollTrigger, SplitText)
   - SVG for interactive body diagrams
+ 
+- **Backend**:
+  - Django
+  - Blockchain/Web3: smart contracts in Solidity.
+
 
 ### Data Structure
 ```javascript
@@ -123,7 +128,7 @@ Diagnify is an advanced health technology platform that combines AI-powered medi
 
 ## License & Copyright
 - Currently unlicensed
-- All rights reserved by ACMECorp (2024)
+- All rights reserved by Diagnify (2025)
 
 ## Roadmap & Future Enhancements
 
