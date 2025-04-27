@@ -1,130 +1,77 @@
-# Diagnify - Medical Symptom Checker
+# Diagnify - Health & Wellness Application
 
 ## Overview
+Diagnify is a comprehensive health and wellness platform that combines AI-powered diagnostics with personalized fitness and nutrition planning. The application features interactive symptom checkers, image analysis for medical scans, and a video chatbot for real-time health consultations.
 
-Diagnify is a web-based medical symptom checker application that helps users identify potential health conditions based on body part selection or symptom search. The application provides:
+## Features
 
-- Interactive human body diagrams (front and back views)
-- Detailed information about possible medical conditions
-- Recommended treatments and first aid advice
-- Specialist doctor recommendations
-- PDF report generation
+### Core Functionalities
+- **Interactive Body Map**: Front and back symptom checker for intuitive health assessment
+- **AI Image Analysis**: Upload X-rays, MRIs, and scans for instant AI-generated insights
+- **Personalized Wellness**: Condition-specific nutrition and fitness plans
+- **Video Chatbot**: Real-time video messaging with AI health assistant
 
-## Files Structure
+### Key Components
+1. **Symptom Checkers**
+   - FrontSymptoms (FrontSYM.html)
+   - BackSymptoms (BackSYM.html)
 
-### HTML Files
+2. **Wellness Tools**
+   - Fitness Planner (D.html)
+   - Nutrition Model (Vision.html)
 
-1. **FrontSYM.html** - Front view of the human body with interactive symptom checker
-2. **BackSYM.html** - Back view of the human body with interactive symptom checker
+3. **AI Features**
+   - Natural language processing for diagnostics
+   - Medical image recognition
+   - Video consultation capabilities
 
-### CSS Files
+## Technologies Used
 
-1. **Feature.css** - Styling for feature cards and UI components
-2. **Footer.css** - Styling for the footer section
-3. **Navbar.css** - Styling for the navigation bar
-
-### JavaScript Files
-
-1. **Footer.js** - Functionality for the footer
-2. **Navbar.js** - Functionality for the navigation bar
-
-## Key Features
-
-### Interactive Body Diagram
-- Users can click on different body parts to see associated conditions
-- Visual feedback with color changes on selection
-- Responsive design works on mobile and desktop
-
-### Comprehensive Medical Database
-- Contains information on hundreds of conditions
-- Organized by body part and system
-- Includes:
-  - Symptoms
-  - Recommended medications
-  - Severity levels
-  - First aid instructions
-  - Recommended specialists
-
-### Search Functionality
-- Search across all conditions and symptoms
-- Real-time results as you type
-
-### PDF Report Generation
-- Create printable/downloadable reports
-- Includes:
-  - Selected body part
-  - Possible conditions
-  - Treatment recommendations
-  - Specialist information
-
-### Specialist Database
-- Contains real doctor information including:
-  - Names
-  - Specialties
-  - Hospital affiliations
-  - Contact information
-  - Addresses
-
-## Technical Implementation
-
-### Front-end Technologies
-- HTML5
-- CSS3 (with responsive design)
-- JavaScript (ES6)
-- jsPDF library for PDF generation
+### Frontend
+- HTML5, CSS3, JavaScript
+- Bootstrap 5 for responsive design
+- GSAP for animations
 - Font Awesome for icons
-- SVG for body diagrams
 
-### Data Structure
-- Medical conditions organized by body part
-- Each condition includes:
-  ```javascript
-  {
-    name: "Condition Name",
-    symptoms: "Detailed symptoms",
-    medications: "Recommended treatments",
-    severity: "low/medium/high",
-    specialist: "Recommended doctor type",
-    firstAid: "Immediate care instructions"
-  }
-  ```
+### Libraries & Frameworks
+- Google Fonts (Druk, Phonk Regular DEMO, Brigends Expanded)
+- Bootstrap 5.3.0
+- GSAP 3.12.2 (with ScrollTrigger and SplitText plugins)
 
-### Special Features
-- Emergency protocols for critical conditions
-- Severity level indicators (color-coded)
-- Interactive UI with hover effects
-- Cross-browser compatibility
+## Installation
+No installation required - this is a web-based application. Simply open `index.html` in any modern web browser.
 
-## Usage Instructions
+## Usage
+1. Navigate through the application using the top navigation bar
+2. Use the interactive body maps to check symptoms
+3. Access personalized fitness and nutrition plans
+4. Utilize the AI chatbot for health inquiries
+5. Upload medical images for AI analysis
 
-1. Open either FrontSYM.html or BackSYM.html in a web browser
-2. Click on a body part or use the search function
-3. View possible conditions and their details
-4. Click "Download as PDF" to generate a report
-5. Use the navigation menu to access other sections of the site
+## File Structure
+```
+index.html            - Main application entry point
+index.css             - Chat interface styling
+Feature.css           - Additional feature styling
+Footer.js             - Footer component logic
+Favi.png              - Application favicon
+img1.png, img2.png,   - Application images
+img3.jpg, img4.png
+```
 
-## Dependencies
-
-- jsPDF (v2.5.1) - For PDF generation
-- Font Awesome (v6.4.0) - For icons
-- Google Fonts (Druk) - For typography
-
-## Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-- Mobile browsers (Chrome for Android, Safari for iOS)
+## Responsive Design
+The application is fully responsive and works on:
+- Desktop (1024px and above)
+- Tablet (768px - 1024px)
+- Mobile (up to 767px)
 
 ## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is currently unlicensed. All rights reserved by ACMECorp (2024).
 
 ## Future Enhancements
+- Integration with health tracking devices
+- Expanded medical image analysis capabilities
+- Multi-language support
+- User account system for saving health data
 
-- User accounts for saving history
-- More detailed symptom questionnaires
-- Integration with health APIs
-- Multilingual support
-- Dark/light mode toggle
+For any questions or support, please contact the development team.
