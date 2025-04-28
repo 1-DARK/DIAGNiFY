@@ -1,161 +1,86 @@
-# Diagnify - Comprehensive Health & Wellness Platform
+DIAGNIFY Frontend
+Overview
+The DIAGNIFY frontend is a responsive web interface for a healthcare diagnostic platform, enabling users to interact with diagnostic tools, view results, and manage their profiles. Built with modern web technologies, it provides a seamless and intuitive user experience.
+Features
 
-## Overview
-Diagnify is an advanced health technology platform that combines AI-powered medical diagnostics with personalized wellness planning. The application integrates interactive symptom checkers, medical image analysis, and real-time health consultations with a comprehensive fitness and nutrition system.
+User Dashboard: View diagnostic results and user profile information.
+Interactive Tools: Access diagnostic questionnaires and tools.
+Responsive Design: Optimized for desktop and mobile devices.
+Real-time Updates: Fetches data from the backend API for live results.
 
-## Key Features
+Technologies Used
 
-### Medical Diagnostic Tools
-- **Interactive Body Maps**:
-  - Front and back views (FrontSYM.html, BackSYM.html)
-  - Clickable body parts with condition information
-  - Visual feedback with color-coded severity indicators
-  - PDF report generation with jsPDF
+React - JavaScript library for building user interfaces.
+TypeScript - For type-safe JavaScript development.
+Tailwind CSS - Utility-first CSS framework for styling.
+Axios - For making HTTP requests to the backend.
+React Router - For client-side routing.
 
-- **AI Medical Imaging**:
-  - X-ray, MRI, and scan analysis
-  - Instant AI-generated insights
-  - Confidence percentage indicators
-  - Potential issue detection
+Prerequisites
+Before you begin, ensure you have the following installed:
 
-### Wellness Planning
-- **Personalized Fitness** (D.html):
-  - Condition-specific exercise routines
-  - Joint-friendly workouts
-  - Progressive difficulty levels
+Node.js (v16 or higher)
+npm (v8 or higher) or Yarn
+Git
 
-- **Nutrition Planning** (Vision.html):
-  - Anti-inflammatory meal plans
-  - Culturally-sensitive dietary recommendations
-  - Heart-healthy options
+Setup Instructions
 
-### Interactive Features
-- **Video Chatbot**:
-  - Real-time video consultations
-  - AI health assistant
-  - Text and video messaging capabilities
+Clone the Repository:
+git clone https://github.com/1-DARK/DIAGNIFY.git
+cd DIAGNIFY/frontend
 
-- **Search Functionality**:
-  - Comprehensive medical database
-  - Real-time symptom search
-  - Emergency protocols for critical conditions
 
-## Technical Implementation
+Install Dependencies:
+npm install
 
-### Core Technologies
-- **Frontend**:
-  - HTML5, CSS3, JavaScript (ES6)
-  - Bootstrap 5.3.0 (responsive design)
-  - GSAP 3.12.2 (animations)
-  - Font Awesome 6.0 (icons)
 
-- **Specialized Libraries**:
-  - jsPDF (PDF report generation)
-  - GSAP plugins (ScrollTrigger, SplitText)
-  - SVG for interactive body diagrams
+Configure Environment Variables:
 
-### Data Structure
-```javascript
-{
-  bodyPart: "Head",
-  conditions: [
-    {
-      name: "Migraine",
-      symptoms: ["Throbbing pain", "Sensitivity to light"],
-      medications: ["Ibuprofen", "Triptans"],
-      severity: "medium",
-      specialist: "Neurologist",
-      firstAid: "Rest in dark room",
-      fitness: ["Neck stretches", "Aerobic exercise"],
-      nutrition: ["Magnesium-rich foods", "Hydration"]
-    }
-  ]
-}
-```
+Create a .env file in the frontend directory.
+Add the backend API URL (replace with your backend URL):REACT_APP_API_URL=http://localhost:5000/api
 
-## File Structure
-```
-├── index.html            - Main application entry point
-├── FrontSYM.html         - Front body view symptom checker
-├── BackSYM.html          - Back body view symptom checker
-├── D.html                - Fitness planner
-├── Vision.html           - Nutrition model
-├── css/
-│   ├── Feature.css       - Feature card styling
-│   ├── Footer.css        - Footer styling
-│   └── Navbar.css        - Navigation styling
-├── js/
-│   ├── Footer.js         - Footer functionality
-│   └── Navbar.js         - Navigation functionality
-├── assets/
-│   ├── Favi.png          - Application favicon
-│   ├── img1-4.png/jpg    - Application images
-│   └── body-diagrams/    - SVG body maps
-```
 
-## Usage Instructions
 
-1. **Symptom Checking**:
-   - Select FrontSYM.html or BackSYM.html
-   - Click on body parts or search symptoms
-   - View condition details and generate PDF reports
 
-2. **Wellness Planning**:
-   - Access D.html for fitness routines
-   - Visit Vision.html for nutrition plans
-   - Get personalized recommendations based on conditions
+Run the Development Server:
+npm start
 
-3. **AI Features**:
-   - Upload medical images for analysis
-   - Use the video chatbot for consultations
-   - Receive instant diagnostic insights
+The app will be available at http://localhost:3000.
 
-## System Requirements
+Build for Production:
+npm run build
 
-### Browser Support
-- Chrome, Firefox, Safari, Edge (latest versions)
-- Mobile browsers (iOS/Android)
+The production-ready files will be in the build directory.
 
-### Responsive Design
-- Desktop (≥1024px)
-- Tablet (768-1024px)
-- Mobile (<768px)
 
-## License & Copyright
-- Currently unlicensed
-- All rights reserved by ACMECorp (2024)
+Project Structure
+frontend/
+├── public/             # Static assets
+├── src/                # Source code
+│   ├── components/     # Reusable React components
+│   ├── pages/          # Page components
+│   ├── styles/         # CSS/Tailwind styles
+│   ├── api/            # API service functions
+│   └── App.tsx         # Main app component
+├── .env                # Environment variables
+├── package.json        # Project dependencies and scripts
+└── README.md           # This file
 
-## Roadmap & Future Enhancements
+Running Tests
+To run the test suite:
+npm test
 
-### Short-term
-- User authentication system
-- Dark/light mode toggle
-- Enhanced emergency protocols
+Contributing
+We welcome contributions! To contribute:
 
-### Mid-term
-- Health tracking device integration
-- Expanded medical image analysis
-- Multilingual support
+Fork the repository.
+Create a feature branch (git checkout -b feature/your-feature).
+Commit your changes (git commit -m "Add your feature").
+Push to the branch (git push origin feature/your-feature).
+Open a Pull Request on GitHub.
 
-### Long-term
-- Telemedicine integration
-- AI-powered diagnostic questionnaires
-- Community health features
-
-For support or inquiries, please contact the Diagnify development team.
-
----
-
-This merged README combines both versions while:
-1. Maintaining all key features from both
-2. Organizing information logically
-3. Including technical details
-4. Providing clear usage instructions
-5. Outlining future plans
-
-The structure flows from overview to specific details, making it easy for both technical and non-technical users to understand the application's capabilities.
-
-## License
-
-- This project is licensed under the MIT License - see the LICENSE file for details.
-
+Please ensure your code follows the project’s coding standards and includes tests where applicable.
+License
+This project is licensed under the MIT License. See the LICENSE file for details.
+Contact
+For questions or support, reach out to the maintainers at 1-DARK GitHub.
