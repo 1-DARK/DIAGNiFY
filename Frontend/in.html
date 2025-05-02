@@ -3,7 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Video Chatbot</title>
+    <title>DiagnoAI</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
       * {
         margin: 0;
@@ -85,9 +89,11 @@
       .main-container {
         display: flex;
         /* Adjust height calculation considering header and controls below */
+        /* Assuming video-controls are around 80px height + 20px padding bottom of container */
         height: calc(
-          100vh - 140px
-        ); /* This might need fine-tuning based on control bar height */
+          100vh - 60px - 20px - 80px
+        ); /* Header ~60px, container padding-bottom 20px, controls ~80px */
+        flex-grow: 1; /* Allow it to take remaining space if height calc is off */
       }
 
       .chat-area {
@@ -124,6 +130,8 @@
         border-radius: 18px;
         animation: fadeIn 0.3s ease-in-out;
         word-wrap: break-word; /* Ensure long text wraps */
+        font-size: 1rem; /* Set base font size for messages */
+        line-height: 1.4;
       }
 
       @keyframes fadeIn {
@@ -149,12 +157,15 @@
         background-color: #1f2937;
         color: #e0e0e0;
         border-bottom-left-radius: 5px;
+        /* Add overflow-x for wide tables within the bot message bubble */
+        overflow-x: auto;
       }
 
       .video-message {
         max-width: 80%;
         align-self: flex-end; /* User is sending the video */
-        background-color: #1e3a8a;
+        background-color: #1e3a8a; /* User message background */
+        padding: 0; /* Remove padding as video should fill */
         border-radius: 18px;
         border-bottom-right-radius: 5px;
         overflow: hidden;
@@ -163,7 +174,7 @@
 
       .video-message video {
         width: 100%;
-        max-width: 300px; /* Limit preview size */
+        max-width: 300px; /* Limit preview size - keep original logic */
         display: block;
       }
 
@@ -254,26 +265,98 @@
         opacity: 1;
       }
 
+      /* --- NEW CSS for Table inside bot-message --- */
+      .bot-message table {
+        width: 100%; /* Make table take full width of the chat bubble (minus padding) */
+        border-collapse: collapse; /* Remove space between table borders */
+        margin-top: 10px; /* Space above the table if there's text before it */
+        margin-bottom: 10px; /* Space below the table if there's text after it */
+        font-size: 15px; /* Adjust font size for better readability within the table cells */
+        line-height: 1.3; /* Adjust line height */
+        /* Table background is transparent, inherits bubble background */
+      }
+
+      .bot-message th,
+      .bot-message td {
+        border: 1px solid #2a3547; /* Border color slightly lighter than bubble background */
+        padding: 8px; /* Padding inside table cells */
+        text-align: left; /* Align text to the left */
+        vertical-align: top; /* Align content to the top in cells */
+        word-wrap: break-word; /* Ensure long words break */
+        white-space: normal; /* Override potential pre-wrap from outside */
+        color: #e0e0e0; /* Inherit text color */
+        font-size: 15px; /* Ensure consistent font size */
+      }
+
+      .bot-message th {
+        background-color: #1f2937; /* Match the bot message background color */
+        font-weight: bold;
+        color: #3b82f6; /* Highlight header text with blue */
+      }
+
+      /* Optional: Alternate row background for better readability */
+      .bot-message tr:nth-child(even) {
+        background-color: rgba(
+          0,
+          0,
+          0,
+          0.1
+        ); /* Slightly darker shade over the bubble background */
+      }
+
+      /* Optional: Hover effect on rows */
+      .bot-message tr:hover {
+        background-color: rgba(
+          59,
+          130,
+          246,
+          0.05
+        ); /* Light blue hover effect */
+      }
+
+      /* Adjust spacing for other raw HTML elements */
+      .bot-message p {
+        margin-bottom: 0.5em; /* Add space between paragraphs */
+      }
+      .bot-message p:last-child {
+        margin-bottom: 0; /* Remove bottom margin from last paragraph */
+      }
+      .bot-message ul,
+      .bot-message ol {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        padding-left: 20px;
+      }
+      .bot-message li {
+        margin-bottom: 5px;
+      }
+
+      /* --- END NEW CSS --- */
+
       @media (max-width: 768px) {
         .main-container {
           flex-direction: column;
-          height: calc(100vh - 140px);
+          height: calc(
+            100vh - 60px - 20px - 80px
+          ); /* Adjust height calc for mobile */
         }
 
         .chat-area,
         .video-area {
           flex: none;
           border-radius: 0;
+          width: 100%; /* Take full width on mobile */
         }
 
         .chat-area {
           height: 50%; /* Adjust as needed */
+          border-bottom: 2px solid #1e3a8a; /* Add separator */
         }
 
         .video-area {
           height: 50%; /* Adjust as needed */
           border-left: none;
-          border-top: 2px solid #1e3a8a;
+          border-top: none; /* Removed as border-bottom is on chat-area now */
         }
       }
     </style>
@@ -290,15 +373,11 @@
       <div class="main-container">
         <div class="chat-area">
           <div class="messages" id="messages">
-            <div class="message bot-message">
-              Hello! I'm your video assistant. Click "Start Video" to record a
-              video message.
-            </div>
+            <!-- Initial bot message added by JS now -->
           </div>
         </div>
         <div class="video-area">
           <div class="video-container">
-            <!-- Removed muted as audio needs to be sent -->
             <video id="videoElement" autoplay playsinline></video>
             <div class="status-message" id="statusMessage"></div>
           </div>
@@ -344,7 +423,7 @@
       const statusMessage = document.getElementById("statusMessage");
 
       // Backend endpoint URL - This is the URL from your curl command
-      const BACKEND_URL = "http://127.0.0.1:8000/video";
+      const BACKEND_URL = "http://127.0.0.1:8000/video"; // Assuming /video endpoint handles video POST
 
       // Variables for video recording
       let stream = null;
@@ -353,22 +432,36 @@
 
       // --- Utility Functions ---
 
-      // Function to add a text message to the chat
-      function addTextMessage(text, isUser) {
+      // Function to add a message to the chat (handles text and HTML for bot)
+      // Modified to accept raw HTML content for bot messages
+      function addMessage(content, isUser) {
         const messageDiv = document.createElement("div");
         messageDiv.classList.add("message");
         messageDiv.classList.add(isUser ? "user-message" : "bot-message");
-        // Use innerHTML if backend might return formatted text, or textContent for plain text
-        messageDiv.textContent = text;
+
+        if (isUser) {
+          // User message: Treat content as plain text (or handle specifically if needed)
+          // For this video chat, user messages are typically just the video,
+          // but keeping text option for debugging/fallback.
+          // If user sends text AND video, you'd need a more complex message structure.
+          // Assuming here text messages are separate from video messages.
+          messageDiv.textContent = content; // Use textContent for safety with user input
+        } else {
+          // Bot message: Treat content as potential HTML, directly set innerHTML
+          // This is the key change allowing tables and other HTML to render
+          messageDiv.innerHTML = content;
+        }
+
         messagesContainer.appendChild(messageDiv);
         // Scroll to the bottom
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        scrollToBottom();
       }
 
       // Function to add a video message to the chat (user's message)
+      // This one is separate because it contains a <video> element
       function addVideoMessage(videoBlob) {
         const messageDiv = document.createElement("div");
-        messageDiv.classList.add("video-message");
+        messageDiv.classList.add("video-message"); // Uses the dedicated video-message style
 
         const videoEl = document.createElement("video");
         videoEl.controls = true; // Allow playback controls
@@ -376,8 +469,15 @@
 
         messageDiv.appendChild(videoEl);
         messagesContainer.appendChild(messageDiv);
-        // Scroll to the bottom
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        scrollToBottom();
+      }
+
+      // Helper to scroll messages to the bottom
+      function scrollToBottom() {
+        // Use setTimeout to ensure DOM update finishes before scrolling
+        setTimeout(() => {
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }, 0);
       }
 
       // Function to display a temporary status message
@@ -385,7 +485,8 @@
         statusMessage.textContent = text;
         statusMessage.classList.add("visible");
         // Automatically hide after 3 seconds
-        setTimeout(() => {
+        if (statusMessage._timer) clearTimeout(statusMessage._timer); // Clear previous timer
+        statusMessage._timer = setTimeout(() => {
           statusMessage.classList.remove("visible");
         }, 3000);
       }
@@ -406,6 +507,7 @@
 
           // Create a MediaRecorder instance
           const options = { mimeType: "video/webm; codecs=vp9,opus" };
+          // Add fallback options for broader browser compatibility
           if (!MediaRecorder.isTypeSupported(options.mimeType)) {
             console.warn(
               `${options.mimeType} is not supported. Trying 'video/webm'.`
@@ -415,23 +517,24 @@
               console.warn(
                 `${options.mimeType} is not supported either. Trying first supported type.`
               );
-              // Find a supported type if webm isn't available (less common)
               const supportedTypes = [
                 "video/webm; codecs=vp8,opus",
                 "video/webm",
                 'video/mp4; codecs="avc1.424028, mp4a.402"', // Common H.264 MP4 codec
                 "video/mp4",
               ];
+              let foundSupportedType = false;
               for (const type of supportedTypes) {
                 if (MediaRecorder.isTypeSupported(type)) {
                   options.mimeType = type;
                   console.log(`Using supported type: ${options.mimeType}`);
+                  foundSupportedType = true;
                   break;
                 }
               }
-              if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+              if (!foundSupportedType) {
                 console.error("No supported video mime type found!");
-                addTextMessage(
+                addMessage(
                   "Error: Your browser doesn't support recording video.",
                   false
                 );
@@ -458,7 +561,7 @@
             });
 
             // Add the recorded video to the chat immediately (user's message)
-            addVideoMessage(videoBlob);
+            addVideoMessage(videoBlob); // Use the dedicated function
 
             // Send the video blob to the backend - THIS IS THE RELEVANT PART
             sendVideoToBackend(videoBlob);
@@ -489,11 +592,12 @@
             errorMessage =
               "Error applying video constraints. Your device might not support the requested resolution/framerate.";
           }
-          addTextMessage(errorMessage, false);
+          addMessage(errorMessage, false); // Use the general addMessage for bot errors
           showStatusMessage("Error starting video.");
           // Ensure buttons are enabled if stream wasn't started
           startButton.disabled = false;
           stopButton.disabled = true;
+          recordingIndicator.classList.remove("active"); // Hide indicator on error
         }
       }
 
@@ -519,7 +623,8 @@
         }
       }
 
-      // Function to send the video blob to the backend - THIS FUNCTION IMPLEMENTS THE CURL LOGIC
+      // Function to send the video blob to the backend
+      // Modified to expect raw HTML response from backend
       async function sendVideoToBackend(videoBlob) {
         showStatusMessage("Sending video to chatbot...");
 
@@ -531,9 +636,16 @@
         // -F "video=@/path/to/file.mp4" -> formData.append("video", videoBlob, "filename")
         // We use the videoBlob we created and give it a generic filename
         const filename = `webcam_video.${
-          videoBlob.type.split("/")[1].split(";")[0]
-        }`; // Get file extension from mime type
+          videoBlob.type.split("/")[1].split(";")[0] || "webm"
+        }`; // Get file extension from mime type, default to webm if needed
         formData.append("video", videoBlob, filename);
+
+        // Add a placeholder message for the bot's response while waiting
+        const placeholderMessage = document.createElement("div");
+        placeholderMessage.classList.add("message", "bot-message");
+        placeholderMessage.innerHTML = "<p>Analyzing video...</p>"; // Initial text inside the bubble
+        messagesContainer.appendChild(placeholderMessage);
+        scrollToBottom(); // Scroll to the placeholder
 
         try {
           // Perform the POST request using fetch API
@@ -543,51 +655,57 @@
             // No need to set headers manually for FormData
           });
 
+          // *** Key Change Here ***
+          // Expect the backend to return HTML content directly (or plain text)
+          const botResponseContent = await response.text(); // Read response as raw text
+
           if (!response.ok) {
             // Handle HTTP errors (e.g., 404, 500, 400)
-            const errorText = await response.text(); // Get response body for more info
             console.error(
               "Backend response error:",
               response.status,
-              errorText
+              botResponseContent // Use the text content from the error response
             );
-            throw new Error(
-              `HTTP error! status: ${response.status}, message: ${
-                response.statusText || errorText
-              }`
-            );
+            // Update placeholder with error details, wrapped in <p>
+            placeholderMessage.innerHTML = `<p>Error from backend: ${
+              response.status
+            } ${
+              response.statusText || ""
+            }. Details: ${botResponseContent.substring(0, 200)}...</p>`;
+            placeholderMessage.style.backgroundColor = "#5a3a3a"; // Indicate error visually
+            placeholderMessage.style.color = "#ffb0b0";
+            showStatusMessage("Error from chatbot backend.");
+          } else {
+            // If response is OK, set the innerHTML of the placeholder with the received content
+            if (!botResponseContent || !botResponseContent.trim()) {
+              // Handle empty response - display a default message, wrapped in <p>
+              placeholderMessage.innerHTML =
+                "<p>Received an empty response from the server.</p>";
+              console.warn("Received empty response from backend.");
+            } else {
+              // Set the innerHTML of the placeholder div directly with the received content
+              // This will render HTML (like tables) or plain text correctly
+              placeholderMessage.innerHTML = botResponseContent;
+            }
+            showStatusMessage("Video sent, response received.");
           }
 
-          // Assuming the backend returns JSON with the chatbot's response
-          // Adjust 'data.response' or 'data.text' based on your *actual* backend JSON structure
-          const data = await response.json();
-
-          const botReply =
-            data.response ||
-            data.text ||
-            (typeof data === "string"
-              ? data
-              : "Received video, but no specific text response key ('response' or 'text') found in backend data.");
-
-          // Add the bot's response to the chat
-          addTextMessage(botReply, false);
-
-          showStatusMessage("Video sent, response received.");
+          scrollToBottom(); // Scroll after updating
         } catch (error) {
           console.error("Error sending video or getting response:", error);
           let displayError = error.message;
           if (error.message.includes("Failed to fetch")) {
             displayError =
-              "Could not connect to the backend server. Is it running?";
-          } else if (error.message.includes("HTTP error")) {
-            // Use the more detailed error message from the throw
-            displayError = error.message;
+              "Could not connect to the backend server. Is it running and accessible?";
+          } else if (error.message.includes("SyntaxError")) {
+            displayError = "Error processing backend response."; // Happens if .json() fails, but we use .text() now
           }
-          addTextMessage(
-            `Error communicating with the chatbot backend: ${displayError}`,
-            false
-          );
-          showStatusMessage("Error sending video.");
+          // Update placeholder with communication error, wrapped in <p>
+          placeholderMessage.innerHTML = `<p>Communication error: ${displayError}</p>`;
+          placeholderMessage.style.backgroundColor = "#5a3a3a"; // Indicate error visually
+          placeholderMessage.style.color = "#ffb0b0";
+          showStatusMessage("Communication error.");
+          scrollToBottom();
         }
       }
 
@@ -599,7 +717,11 @@
       document.addEventListener("DOMContentLoaded", () => {
         startButton.disabled = false;
         stopButton.disabled = true;
-        // Initial bot message is already in the HTML
+        // Add the initial bot message using the new addMessage function
+        addMessage(
+          "<p>Hello! I'm your video assistant. Click 'Start Video' to record a video message.</p>",
+          false
+        );
       });
     </script>
   </body>
